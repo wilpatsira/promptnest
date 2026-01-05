@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <title>PromptNest - Prompt Library</title>
+    <link rel="icon" type="image/png" href="https://ui-avatars.com/api/?name=PN&background=111&color=fff&size=128&bold=true" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            },
+            colors: {
+              background: '#FDFBF7',
+              surface: '#FFFFFF',
+              primary: '#111111',
+              secondary: '#666666',
+              border: '#E5E5E5',
+            },
+            boxShadow: {
+              'soft': '0 2px 12px rgba(0, 0, 0, 0.03)',
+              'card': '0 1px 3px rgba(0,0,0,0.05), 0 5px 15px rgba(0,0,0,0.02)',
+              'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            },
+            animation: {
+              'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+            },
+            keyframes: {
+              shake: {
+                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #FDFBF7;
+        color: #111;
+        -webkit-font-smoothing: antialiased;
+      }
+      /* Custom Scrollbar for a cleaner look */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #E5E5E5;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #D4D4D4;
+      }
+      .backdrop-blur-md {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/+esm",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
