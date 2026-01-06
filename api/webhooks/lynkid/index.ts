@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 // ============================================
 // SUPABASE CLIENT
@@ -144,18 +145,64 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
 }
 
 // ============================================
-// WEBHOOK PAYLOAD INTERFACE
+// LYNK.ID SIGNATURE VALIDATION
 // ============================================
+function validateLynkSignature(
+    ref_id: string,
+    amount: string | number,
+    message_id: string,
+    receivedSignature: string,
+    secretKey: string
+): boolean {
+    const signatureString = String(amount) + ref_id + message_id + secretKey;
+    const calculatedSignature = crypto
+        .createHash('sha256')
+        .update(signatureString)
+        .digest('hex');
+
+    console.log('Signature validation:');
+    console.log('  signatureString:', signatureString);
+    console.log('  calculatedSignature:', calculatedSignature);
+    console.log('  receivedSignature:', receivedSignature);
+
+    return calculatedSignature === receivedSignature;
+}
+
+// ============================================
+// LYNK.ID WEBHOOK PAYLOAD INTERFACES
+// ============================================
+interface LynkIdCustomer {
+    email: string;
+    name: string;
+    phone?: string;
+}
+
+interface LynkIdMessageData {
+    createdAt: string;
+    customer: LynkIdCustomer;
+    items: Array<{
+        title: string;
+        price: number;
+        qty: number;
+    }>;
+    refId: string;
+    totals: {
+        grandTotal: number;
+        totalPrice: number;
+    };
+}
+
 interface LynkIdWebhookPayload {
-    id?: string;
-    status: string;
-    customer_email: string;
-    customer_name?: string;
-    customer_phone?: string;
-    product_name?: string;
-    product_price?: number;
-    payment_method?: string;
-    paid_at?: string;
+    event: string;
+    data: {
+        message_action: string;
+        message_code: string;
+        message_data: LynkIdMessageData;
+        message_id: string;
+        message_desc?: string;
+        message_title?: string;
+    };
+    signature?: string;
 }
 
 // ============================================
@@ -171,46 +218,74 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Headers:', JSON.stringify(req.headers, null, 2));
     console.log('Body:', JSON.stringify(req.body, null, 2));
 
-    // Optional: Verify Merchant Key for security
-    const merchantKey = process.env.LYNKID_MERCHANT_KEY;
-    if (merchantKey) {
-        const headerKey = req.headers['x-merchant-key'] ||
-            req.headers['x-api-key'] ||
-            req.headers['authorization'];
-        const bodyKey = req.body?.merchant_key || req.body?.api_key;
-        const providedKey = headerKey || bodyKey;
-
-        if (providedKey !== merchantKey && providedKey !== `Bearer ${merchantKey}`) {
-            console.error('Invalid merchant key');
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-    }
-
     try {
         const payload = req.body as LynkIdWebhookPayload;
 
-        // Validate required fields
-        if (!payload.customer_email) {
-            console.error('Missing customer_email in payload');
-            return res.status(400).json({ error: 'Missing customer_email' });
-        }
-
-        // Check payment status
-        const validStatuses = ['paid', 'success', 'completed', 'PAID', 'SUCCESS', 'COMPLETED'];
-        if (!validStatuses.includes(payload.status)) {
-            console.log(`Payment status "${payload.status}" is not a success status. Ignoring.`);
+        // Validate event type
+        if (payload.event !== 'payment.received') {
+            console.log(`Event type "${payload.event}" is not payment.received. Ignoring.`);
             return res.status(200).json({
-                message: 'Webhook received but payment not completed',
-                status: payload.status
+                message: 'Webhook received but event type not handled',
+                event: payload.event
             });
         }
 
-        console.log(`Processing purchase for: ${payload.customer_email}`);
+        // Validate message action (SUCCESS)
+        if (payload.data?.message_action !== 'SUCCESS') {
+            console.log(`Message action "${payload.data?.message_action}" is not SUCCESS. Ignoring.`);
+            return res.status(200).json({
+                message: 'Webhook received but payment not successful',
+                message_action: payload.data?.message_action
+            });
+        }
+
+        // Optional: Validate signature if merchant key is set
+        const merchantKey = process.env.LYNKID_MERCHANT_KEY;
+        // Signature is sent via header X-Lynk-Signature
+        const signature = req.headers['x-lynk-signature'] as string | undefined;
+
+        if (merchantKey && signature) {
+            const messageData = payload.data.message_data;
+            const amount = messageData.totals?.grandTotal || messageData.totals?.totalPrice || 0;
+
+            const isValid = validateLynkSignature(
+                messageData.refId,
+                amount,
+                payload.data.message_id,
+                signature,
+                merchantKey
+            );
+
+            if (!isValid) {
+                console.error('Invalid signature');
+                return res.status(401).json({ error: 'Invalid signature' });
+            }
+            console.log('Signature validated successfully');
+        } else {
+            console.log('Skipping signature validation (no signature header or merchant key)');
+        }
+
+        // Extract customer info from nested structure
+        const customer = payload.data?.message_data?.customer;
+        const customerEmail = customer?.email || '';
+        const customerName = customer?.name || '';
+
+        // Validate required fields
+        if (!customerEmail) {
+            console.error('Missing customer email in payload');
+            console.log('Payload structure:', JSON.stringify(payload, null, 2));
+            return res.status(400).json({
+                error: 'Missing customer email',
+                hint: 'Expected at data.message_data.customer.email'
+            });
+        }
+
+        console.log(`Processing purchase for: ${customerEmail} (${customerName})`);
 
         // Step 1: Assign license
         let licenseCode: string | null = null;
         try {
-            licenseCode = await assignLicenseToBuyer(payload.customer_email);
+            licenseCode = await assignLicenseToBuyer(customerEmail);
         } catch (dbError) {
             console.error('Database error:', dbError);
             return res.status(500).json({
@@ -232,15 +307,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Step 3: Send email
         try {
-            await sendLicenseEmail(payload.customer_email, payload.customer_name || '', licenseCode);
-            console.log(`Email sent to: ${payload.customer_email}`);
+            await sendLicenseEmail(customerEmail, customerName, licenseCode);
+            console.log(`Email sent to: ${customerEmail}`);
         } catch (emailError) {
             console.error('Email sending failed:', emailError);
             return res.status(200).json({
                 success: true,
                 warning: 'License assigned but email delivery failed',
                 licenseCode: licenseCode,
-                email: payload.customer_email
+                email: customerEmail
             });
         }
 
@@ -248,8 +323,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json({
             success: true,
             message: 'License assigned and email sent',
-            email: payload.customer_email,
-            licenseCode: licenseCode
+            email: customerEmail,
+            licenseCode: licenseCode,
+            refId: payload.data.message_data.refId
         });
 
     } catch (error) {
