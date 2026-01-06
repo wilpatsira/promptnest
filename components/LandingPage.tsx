@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Check, Zap, Layout, Shield, Smartphone, Play, Command, FileText, Tags, MousePointer2, Lock, Sparkles, Database, Send, Layers, X, Globe, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Check, Zap, Layout, Shield, Smartphone, Play, Command, FileText, Tags, MousePointer2, Lock, Sparkles, Database, Send, Layers, X, Globe, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Purchase Links - Update these with your actual store URLs
 const PURCHASE_LINKS = {
@@ -11,8 +11,42 @@ interface LandingPageProps {
   onGetStarted: () => void;
 }
 
+// Feature Carousel Slides
+const FEATURE_SLIDES = [
+  {
+    image: '/features/prompt-library.png',
+    title: 'A Clean, Dynamic & Ready-to-Use Prompt Library',
+    description: 'Manage, store, and run AI prompts from a single cloud-based dashboard.'
+  },
+  {
+    image: '/features/card-interface.png',
+    title: 'Intuitive Card-Based Interface',
+    description: 'Each prompt is displayed in a clear, actionable card—just click Run, or Fill & Run.'
+  },
+  {
+    image: '/features/search-filter.png',
+    title: 'Find Prompts Faster, Stay Organized',
+    description: 'Access any prompt in seconds with favorites, sorting, tag filters, and global search.'
+  },
+  {
+    image: '/features/prompt-editor.png',
+    title: 'Structured Prompts, Not Just Plain Text',
+    description: 'Each prompt comes fully structured—with platform, tags, and reusable variables.'
+  },
+  {
+    image: '/features/version-history.png',
+    title: 'All Edit History Securely Saved',
+    description: 'Every change is automatically stored and can be restored anytime.'
+  }
+];
+
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % FEATURE_SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + FEATURE_SLIDES.length) % FEATURE_SLIDES.length);
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col font-sans text-[#111]">
 
@@ -134,6 +168,83 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <h3 className="text-xl font-bold mb-3">3. Execute Anywhere</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">Fill your custom variables and hit 'Run'. PromptNest copies your input and opens your favorite AI tool instantly.</p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Feature Carousel Section */}
+        <section className="py-20 bg-[#FDFBF7] overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-bold uppercase tracking-wider mb-6">
+                <Sparkles size={12} /> App Preview
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">See PromptNest in Action</h2>
+              <p className="text-gray-500 max-w-xl mx-auto">A visual tour of the features that make PromptNest your ultimate AI prompt companion.</p>
+            </div>
+
+            {/* Carousel Container */}
+            <div className="relative">
+              {/* Main Image */}
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden mx-auto max-w-4xl">
+                <div className="aspect-[4/3] relative">
+                  <img
+                    src={FEATURE_SLIDES[currentSlide].image}
+                    alt={FEATURE_SLIDES[currentSlide].title}
+                    className="w-full h-full object-contain bg-gray-50 transition-opacity duration-500"
+                  />
+                </div>
+
+                {/* Caption Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-8">
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{FEATURE_SLIDES[currentSlide].title}</h3>
+                  <p className="text-gray-300 text-sm md:text-base">{FEATURE_SLIDES[currentSlide].description}</p>
+                </div>
+              </div>
+
+              {/* Navigation Buttons */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-900 hover:scale-110 transition-all z-10"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-900 hover:scale-110 transition-all z-10"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </div>
+
+            {/* Dot Indicators */}
+            <div className="flex items-center justify-center gap-2 mt-8">
+              {FEATURE_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
+                      ? 'bg-gray-900 w-8'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
+                />
+              ))}
+            </div>
+
+            {/* Thumbnail Strip */}
+            <div className="flex items-center justify-center gap-3 mt-6 overflow-x-auto pb-2 no-scrollbar">
+              {FEATURE_SLIDES.map((slide, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all duration-300 ${index === currentSlide
+                      ? 'border-gray-900 shadow-lg scale-110'
+                      : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                >
+                  <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
+                </button>
+              ))}
             </div>
           </div>
         </section>
