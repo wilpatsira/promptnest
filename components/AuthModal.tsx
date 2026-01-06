@@ -59,18 +59,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
 
   useEffect(() => {
     pingServer();
+
+    // Warm up auth service (wake it up from cold start)
+    import('../services/auth').then(({ supabase }) => {
+      supabase.auth.getSession().catch(() => { });
+    });
+
     // Retry every 3 seconds if not online (reduced from 5s)
     retryIntervalRef.current = setInterval(() => {
       if (status !== 'online') pingServer();
     }, 3000);
 
-    // Fallback: if still connecting after 8 seconds, force online
+    // Fallback: if still connecting after 5 seconds, force online
     const fallbackTimeout = setTimeout(() => {
       if (status === 'connecting') {
         setStatus('online');
         setStatusMsg('Security: Online');
       }
-    }, 8000);
+    }, 5000);
 
     return () => {
       if (retryIntervalRef.current) clearInterval(retryIntervalRef.current);
