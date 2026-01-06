@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { assignLicenseToBuyer } from '../lib/supabase';
-import { sendLicenseEmail } from '../lib/resend';
+import { assignLicenseToBuyer } from '../../lib/supabase';
+import { sendLicenseEmail } from '../../lib/resend';
 
 // Lynk.id webhook payload structure (may vary, adjust as needed)
 interface LynkIdWebhookPayload {
