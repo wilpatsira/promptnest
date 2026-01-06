@@ -37,6 +37,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Headers:', JSON.stringify(req.headers, null, 2));
     console.log('Body:', JSON.stringify(req.body, null, 2));
 
+    // Optional: Verify Merchant Key for security
+    const merchantKey = process.env.LYNKID_MERCHANT_KEY;
+    if (merchantKey) {
+        // Check in headers (common patterns)
+        const headerKey = req.headers['x-merchant-key'] ||
+            req.headers['x-api-key'] ||
+            req.headers['authorization'];
+        // Also check in body
+        const bodyKey = req.body?.merchant_key || req.body?.api_key;
+
+        const providedKey = headerKey || bodyKey;
+
+        if (providedKey !== merchantKey && providedKey !== `Bearer ${merchantKey}`) {
+            console.error('Invalid merchant key');
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+    }
+
     try {
         const payload = req.body as LynkIdWebhookPayload;
 
