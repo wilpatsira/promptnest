@@ -4,7 +4,7 @@ import { ArrowRight, Check, Zap, Layout, Shield, Smartphone, Play, Command, File
 // Purchase Links - Update these with your actual store URLs
 const PURCHASE_LINKS = {
   lynkId: 'https://lynk.id/yangpentingtekad/77j3dzw39x2v', // Indonesia
-  gumroad: 'https://YOUR_STORE.gumroad.com/l/promptnest', // Global
+  gumroad: 'https://merubahhidupmu.gumroad.com/l/promptnest', // Global
 };
 
 interface LandingPageProps {
@@ -186,19 +186,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             {/* Carousel Container */}
             <div className="relative">
               {/* Main Image */}
-              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden mx-auto max-w-4xl">
-                <div className="aspect-[4/3] relative">
+              <div className="relative overflow-hidden mx-auto max-w-4xl">
+                <div className="aspect-square relative">
                   <img
                     src={FEATURE_SLIDES[currentSlide].image}
                     alt={FEATURE_SLIDES[currentSlide].title}
-                    className="w-full h-full object-contain bg-gray-50 transition-opacity duration-500"
+                    className="w-full h-full object-cover transition-opacity duration-500"
                   />
-                </div>
-
-                {/* Caption Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-8">
-                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{FEATURE_SLIDES[currentSlide].title}</h3>
-                  <p className="text-gray-300 text-sm md:text-base">{FEATURE_SLIDES[currentSlide].description}</p>
                 </div>
               </div>
 
@@ -224,8 +218,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
-                      ? 'bg-gray-900 w-8'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                    ? 'bg-gray-900 w-8'
+                    : 'bg-gray-300 hover:bg-gray-400'
                     }`}
                 />
               ))}
@@ -238,8 +232,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all duration-300 ${index === currentSlide
-                      ? 'border-gray-900 shadow-lg scale-110'
-                      : 'border-transparent opacity-60 hover:opacity-100'
+                    ? 'border-gray-900 shadow-lg scale-110'
+                    : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                 >
                   <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
