@@ -166,22 +166,28 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
       authUser = signUpData.user;
       isNewUser = true;
 
-      // Run updates in parallel for faster performance
+      // Update licenses table (critical - must await)
       if (authUser?.id) {
-        await Promise.all([
-          supabase
-            .from('licenses')
-            .update({ is_used: true, used_by: authUser.id, activated_at: new Date().toISOString() })
-            .eq('code', cleanLicense),
-          supabase
-            .from('profiles')
-            .update({
-              license_code: cleanLicense,
-              username: cleanUsername,
-              redeemed_at: new Date().toISOString()
-            })
-            .eq('id', authUser.id)
-        ]);
+        await supabase
+          .from('licenses')
+          .update({ is_used: true, used_by: authUser.id, activated_at: new Date().toISOString() })
+          .eq('code', cleanLicense);
+
+        // Update profiles in background (non-blocking) - trigger may not have created profile yet
+        setTimeout(async () => {
+          try {
+            await supabase
+              .from('profiles')
+              .update({
+                license_code: cleanLicense,
+                username: cleanUsername,
+                redeemed_at: new Date().toISOString()
+              })
+              .eq('id', authUser!.id);
+          } catch (e) {
+            console.warn('Profile update deferred:', e);
+          }
+        }, 1000);
       }
     }
 
