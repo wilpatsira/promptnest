@@ -314,6 +314,8 @@ const App: React.FC = () => {
       clearPromptCache();
       setPrompts([]);
       initialDataLoaded.current = false;
+      isSeedingRef.current = false; // Reset so demo can be seeded
+      setIsPreparing(true); // Show preparing screen
     }
     setCurrentUser(u);
   }} onBack={() => setShowLanding(true)} />;
