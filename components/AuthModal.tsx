@@ -99,9 +99,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
     setIsLoading(true);
 
     try {
-      // Add 15 second timeout to prevent infinite hang
+      // Add 25 second timeout to prevent infinite hang (longer for new users)
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 15000)
+        setTimeout(() => reject(new Error('timeout')), 25000)
       );
 
       const result = await Promise.race([

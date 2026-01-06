@@ -166,22 +166,22 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
       authUser = signUpData.user;
       isNewUser = true;
 
-      // Update licenses table
-      await supabase
-        .from('licenses')
-        .update({ is_used: true, used_by: authUser?.id, activated_at: new Date().toISOString() })
-        .eq('code', cleanLicense);
-
-      // Update profiles table with license info
+      // Run updates in parallel for faster performance
       if (authUser?.id) {
-        await supabase
-          .from('profiles')
-          .update({
-            license_code: cleanLicense,
-            username: cleanUsername,
-            redeemed_at: new Date().toISOString()
-          })
-          .eq('id', authUser.id);
+        await Promise.all([
+          supabase
+            .from('licenses')
+            .update({ is_used: true, used_by: authUser.id, activated_at: new Date().toISOString() })
+            .eq('code', cleanLicense),
+          supabase
+            .from('profiles')
+            .update({
+              license_code: cleanLicense,
+              username: cleanUsername,
+              redeemed_at: new Date().toISOString()
+            })
+            .eq('id', authUser.id)
+        ]);
       }
     }
 
