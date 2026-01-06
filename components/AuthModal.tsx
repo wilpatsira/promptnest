@@ -99,16 +99,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
     setIsLoading(true);
 
     try {
-      const result = await signInWithLicense(username, licenseCode);
+      // Add 15 second timeout to prevent infinite hang
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 15000)
+      );
+
+      const result = await Promise.race([
+        signInWithLicense(username, licenseCode),
+        timeoutPromise
+      ]);
+
       if (result.success && result.user) {
         onLogin(result.user, result.isNewUser);
-        // Note: isLoading will be reset when component unmounts after successful login
       } else {
-        setError(result.message || 'Verification timed out. Please try once more.');
+        setError(result.message || 'Verification failed. Please try again.');
         setIsLoading(false);
       }
-    } catch (err) {
-      setError('Connection interrupted. Retrying...');
+    } catch (err: any) {
+      if (err?.message === 'timeout') {
+        setError('Connection timed out. Please try again.');
+      } else {
+        setError('Connection interrupted. Please try again.');
+      }
       setIsLoading(false);
     }
   };
