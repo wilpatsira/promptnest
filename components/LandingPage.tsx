@@ -3,7 +3,7 @@ import { ArrowRight, Check, Zap, Layout, Shield, Smartphone, Play, Command, File
 
 // Purchase Links - Update these with your actual store URLs
 const PURCHASE_LINKS = {
-  lynkId: 'https://lynk.id/YOUR_STORE/promptnest', // Indonesia
+  lynkId: 'https://lynk.id/yangpentingtekad/77j3dzw39x2v', // Indonesia
   gumroad: 'https://YOUR_STORE.gumroad.com/l/promptnest', // Global
 };
 
