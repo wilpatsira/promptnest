@@ -102,6 +102,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
       const result = await signInWithLicense(username, licenseCode);
       if (result.success && result.user) {
         onLogin(result.user, result.isNewUser);
+        // Note: isLoading will be reset when component unmounts after successful login
       } else {
         setError(result.message || 'Verification timed out. Please try once more.');
         setIsLoading(false);

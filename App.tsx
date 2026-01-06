@@ -309,13 +309,15 @@ const App: React.FC = () => {
   );
 
   if (!currentUser) return showLanding ? <LandingPage onGetStarted={() => setShowLanding(false)} /> : <AuthModal onLogin={(u, isNewUser) => {
-    // Clear cache for new users to ensure fresh data + demo prompts
+    // Always reset data loading state for fresh data
+    initialDataLoaded.current = false;
+
+    // Clear cache for new users to ensure demo prompts
     if (isNewUser) {
       clearPromptCache();
       setPrompts([]);
-      initialDataLoaded.current = false;
-      isSeedingRef.current = false; // Reset so demo can be seeded
-      setIsPreparing(true); // Show preparing screen
+      isSeedingRef.current = false;
+      setIsPreparing(true);
     }
     setCurrentUser(u);
   }} onBack={() => setShowLanding(true)} />;
