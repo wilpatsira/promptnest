@@ -308,7 +308,15 @@ const App: React.FC = () => {
     </div>
   );
 
-  if (!currentUser) return showLanding ? <LandingPage onGetStarted={() => setShowLanding(false)} /> : <AuthModal onLogin={(u) => { setCurrentUser(u); }} onBack={() => setShowLanding(true)} />;
+  if (!currentUser) return showLanding ? <LandingPage onGetStarted={() => setShowLanding(false)} /> : <AuthModal onLogin={(u, isNewUser) => {
+    // Clear cache for new users to ensure fresh data + demo prompts
+    if (isNewUser) {
+      clearPromptCache();
+      setPrompts([]);
+      initialDataLoaded.current = false;
+    }
+    setCurrentUser(u);
+  }} onBack={() => setShowLanding(true)} />;
 
   return (
     <div className="min-h-screen pb-20 bg-[#FDFBF7] animate-in fade-in duration-500 ease-out">
@@ -318,7 +326,7 @@ const App: React.FC = () => {
             <img src="https://ui-avatars.com/api/?name=PN&background=111&color=fff&size=64&bold=true" className="w-8 h-8 rounded-lg" alt="Logo" />
             <span className="font-bold text-xl text-gray-900 hidden sm:block">PromptNest</span>
             <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase transition-colors ${lastSyncStatus === 'synced' ? 'text-green-600 bg-green-50' :
-                lastSyncStatus === 'syncing' ? 'text-blue-600 bg-blue-50' : 'text-red-600 bg-red-50'
+              lastSyncStatus === 'syncing' ? 'text-blue-600 bg-blue-50' : 'text-red-600 bg-red-50'
               }`}>
               {lastSyncStatus === 'synced' ? <CloudCheck size={12} /> :
                 lastSyncStatus === 'syncing' ? <RefreshCw size={12} className="animate-spin" /> : <CloudOff size={12} />}
@@ -364,8 +372,8 @@ const App: React.FC = () => {
               <button
                 onClick={() => { setIsTagFilterOpen(!isTagFilterOpen); setIsSortMenuOpen(false); }}
                 className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-medium transition-all ${selectedTags.length > 0
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                   }`}
               >
                 <Tags size={14} />

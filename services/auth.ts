@@ -27,30 +27,31 @@ export const pingDatabase = async () => {
 };
 
 /**
- * Optimized Connection Check
+ * Optimized Connection Check - faster timeout
  */
 export const checkConnection = async (): Promise<{ connected: boolean; status: 'online' | 'connecting' | 'offline' }> => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  // Reduced timeout from 15s to 5s for faster UX
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    
+    // Quick ping to database - minimal query
     const { error: dbError } = await supabase
-      .from('profiles')
-      .select('id')
+      .from('licenses')
+      .select('code')
       .limit(1)
       .abortSignal(controller.signal);
-      
+
     clearTimeout(timeoutId);
-    
+
     if (dbError) {
+      // JWT or auth errors still mean DB is reachable
       if (dbError.code === 'PGRST301' || dbError.message.includes('JWT')) {
         return { connected: true, status: 'online' };
       }
       return { connected: false, status: 'connecting' };
     }
-    
+
     return { connected: true, status: 'online' };
   } catch (e: any) {
     clearTimeout(timeoutId);
@@ -60,40 +61,40 @@ export const checkConnection = async (): Promise<{ connected: boolean; status: '
 };
 
 export const mapSupabaseUser = async (supabaseUser: SupabaseUser): Promise<User | null> => {
-    try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', supabaseUser.id)
-          .maybeSingle();
-      
-        const displayName = profile?.display_name || supabaseUser.user_metadata?.display_name || supabaseUser.email?.split('@')[0] || 'User';
-        const photoUrl = profile?.photo_url || `https://ui-avatars.com/api/?name=${displayName.charAt(0)}&background=111&color=fff`;
-        const joinedAt = profile?.created_at ? new Date(profile.created_at).getTime() : Date.now();
-        const redeemedAt = profile?.redeemed_at ? new Date(profile.redeemed_at).getTime() : undefined;
-      
-        return {
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          displayName: displayName,
-          photoUrl: photoUrl,
-          licenseCode: profile?.license_code || 'ACTIVE-USER',
-          username: profile?.username || displayName,
-          joinedAt: joinedAt,
-          redeemedAt: redeemedAt,
-        };
-    } catch (e) {
-        return null;
-    }
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', supabaseUser.id)
+      .maybeSingle();
+
+    const displayName = profile?.display_name || supabaseUser.user_metadata?.display_name || supabaseUser.email?.split('@')[0] || 'User';
+    const photoUrl = profile?.photo_url || `https://ui-avatars.com/api/?name=${displayName.charAt(0)}&background=111&color=fff`;
+    const joinedAt = profile?.created_at ? new Date(profile.created_at).getTime() : Date.now();
+    const redeemedAt = profile?.redeemed_at ? new Date(profile.redeemed_at).getTime() : undefined;
+
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      displayName: displayName,
+      photoUrl: photoUrl,
+      licenseCode: profile?.license_code || 'ACTIVE-USER',
+      username: profile?.username || displayName,
+      joinedAt: joinedAt,
+      redeemedAt: redeemedAt,
+    };
+  } catch (e) {
+    return null;
+  }
 };
 
 export const getCurrentUser = (): User | null => {
   const data = localStorage.getItem(SESSION_KEY);
   if (!data) return null;
   try {
-      return JSON.parse(data);
+    return JSON.parse(data);
   } catch {
-      return null;
+    return null;
   }
 };
 
@@ -103,9 +104,9 @@ export const logout = async () => {
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem('promptnest_user_prompts');
     Object.keys(localStorage).forEach(key => {
-        if (key.includes('supabase') || key.startsWith('sb-')) {
-            localStorage.removeItem(key);
-        }
+      if (key.includes('supabase') || key.startsWith('sb-')) {
+        localStorage.removeItem(key);
+      }
     });
   } catch (err) {
     console.error("Logout error:", err);
@@ -119,10 +120,10 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
 
   try {
     const { data: licenseData, error: licenseError } = await supabase
-        .from('licenses')
-        .select('*')
-        .eq('code', cleanLicense)
-        .maybeSingle();
+      .from('licenses')
+      .select('*')
+      .eq('code', cleanLicense)
+      .maybeSingle();
 
     if (licenseError) throw new Error("Syncing security protocols. Please retry in a few seconds.");
     if (!licenseData) return { success: false, message: "Invalid license code.", isNewUser: false };
@@ -131,70 +132,83 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
     let isNewUser = false;
 
     if (licenseData.is_used) {
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ 
-            email, 
-            password: cleanLicense 
-        });
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: cleanLicense
+      });
 
-        if (signInError) {
-            if (signInError.message.includes('Invalid login')) {
-                return { success: false, message: "Username does not match this license.", isNewUser: false };
-            }
-            throw signInError;
+      if (signInError) {
+        if (signInError.message.includes('Invalid login')) {
+          return { success: false, message: "Username does not match this license.", isNewUser: false };
         }
-        authUser = signInData.user;
+        throw signInError;
+      }
+      authUser = signInData.user;
     } else {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password: cleanLicense,
-            options: { data: { display_name: cleanUsername, username: cleanUsername } }
-        });
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: cleanLicense,
+        options: { data: { display_name: cleanUsername, username: cleanUsername } }
+      });
 
-        if (signUpError) throw signUpError;
-        authUser = signUpData.user;
-        isNewUser = true;
+      if (signUpError) throw signUpError;
+      authUser = signUpData.user;
+      isNewUser = true;
 
+      // Update licenses table
+      await supabase
+        .from('licenses')
+        .update({ is_used: true, used_by: authUser?.id, activated_at: new Date().toISOString() })
+        .eq('code', cleanLicense);
+
+      // Update profiles table with license info
+      if (authUser?.id) {
         await supabase
-            .from('licenses')
-            .update({ is_used: true, used_by: authUser?.id, activated_at: new Date().toISOString() })
-            .eq('code', cleanLicense);
+          .from('profiles')
+          .update({
+            license_code: cleanLicense,
+            username: cleanUsername,
+            redeemed_at: new Date().toISOString()
+          })
+          .eq('id', authUser.id);
+      }
     }
 
     if (authUser) {
-        const user = await mapSupabaseUser(authUser);
-        if (user) {
-            localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-            return { success: true, user, isNewUser };
-        }
+      const user = await mapSupabaseUser(authUser);
+      if (user) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        return { success: true, user, isNewUser };
+      }
     }
 
     return { success: false, message: "Vault synchronization failed.", isNewUser: false };
   } catch (err: any) {
-      return { success: false, message: err.message || "Security handshake failed.", isNewUser: false };
+    return { success: false, message: err.message || "Security handshake failed.", isNewUser: false };
   }
 };
 
 export const updateProfile = async (updatedUser: User): Promise<{ success: boolean; user?: User; message?: string }> => {
-    try {
-        const { data, error } = await supabase.from('profiles').update({ 
-            display_name: updatedUser.displayName, 
-            photo_url: updatedUser.photoUrl 
-        }).eq('id', updatedUser.id).select().single();
-        
-        if (error) return { success: false, message: error.message };
-        if (data) {
-            const u = { 
-                ...updatedUser, 
-                displayName: data.display_name, 
-                photoUrl: data.photo_url,
-                licenseCode: data.license_code || updatedUser.licenseCode,
-                redeemedAt: data.redeemed_at ? new Date(data.redeemed_at).getTime() : updatedUser.redeemedAt
-            };
-            localStorage.setItem(SESSION_KEY, JSON.stringify(u));
-            return { success: true, user: u };
-        }
-        return { success: false, message: "Failed to update profile." };
-    } catch (e: any) {
-        return { success: false, message: e.message || "Error" };
+  try {
+    const { data, error } = await supabase.from('profiles').update({
+      display_name: updatedUser.displayName,
+      photo_url: updatedUser.photoUrl
+    }).eq('id', updatedUser.id).select().single();
+
+    if (error) return { success: false, message: error.message };
+    if (data) {
+      const u = {
+        ...updatedUser,
+        displayName: data.display_name,
+        photoUrl: data.photo_url,
+        licenseCode: data.license_code || updatedUser.licenseCode,
+        redeemedAt: data.redeemed_at ? new Date(data.redeemed_at).getTime() : updatedUser.redeemedAt
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(u));
+      return { success: true, user: u };
     }
+    return { success: false, message: "Failed to update profile." };
+  } catch (e: any) {
+    return { success: false, message: e.message || "Error" };
+  }
 };
