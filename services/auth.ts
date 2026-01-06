@@ -101,16 +101,27 @@ export const getCurrentUser = (): User | null => {
 export const logout = async () => {
   try {
     await supabase.auth.signOut({ scope: 'global' });
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem('promptnest_user_prompts');
-    Object.keys(localStorage).forEach(key => {
-      if (key.includes('supabase') || key.startsWith('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
   } catch (err) {
-    console.error("Logout error:", err);
+    console.error("Logout signOut error:", err);
   }
+
+  // Clear all app data from localStorage
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('promptnest_user_prompts');
+
+  // Clear all Supabase related keys
+  Object.keys(localStorage).forEach(key => {
+    if (key.includes('supabase') || key.startsWith('sb-') || key.includes('promptnest')) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // Clear sessionStorage too
+  Object.keys(sessionStorage).forEach(key => {
+    if (key.includes('supabase') || key.startsWith('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
 };
 
 export const signInWithLicense = async (username: string, licenseCode: string): Promise<{ success: boolean; message?: string; user?: User; isNewUser: boolean }> => {
