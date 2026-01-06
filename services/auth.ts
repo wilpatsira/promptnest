@@ -98,25 +98,17 @@ export const getCurrentUser = (): User | null => {
   }
 };
 
-export const logout = async () => {
-  try {
-    await supabase.auth.signOut({ scope: 'global' });
-  } catch (err) {
-    console.error("Logout signOut error:", err);
-  }
-
-  // Clear all app data from localStorage
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem('promptnest_user_prompts');
-
-  // Clear all Supabase related keys
+export const clearAllBrowserStorage = () => {
+  // Clear localStorage
   Object.keys(localStorage).forEach(key => {
     if (key.includes('supabase') || key.startsWith('sb-') || key.includes('promptnest')) {
       localStorage.removeItem(key);
     }
   });
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('promptnest_user_prompts');
 
-  // Clear sessionStorage too
+  // Clear sessionStorage
   Object.keys(sessionStorage).forEach(key => {
     if (key.includes('supabase') || key.startsWith('sb-')) {
       sessionStorage.removeItem(key);
@@ -124,10 +116,23 @@ export const logout = async () => {
   });
 };
 
+export const logout = async () => {
+  // Clear storage first (before signOut which might hang)
+  clearAllBrowserStorage();
+
+  try {
+    await supabase.auth.signOut({ scope: 'global' });
+  } catch (err) {
+    console.error("Logout signOut error:", err);
+  }
+};
+
 export const signInWithLicense = async (username: string, licenseCode: string): Promise<{ success: boolean; message?: string; user?: User; isNewUser: boolean }> => {
   const cleanLicense = licenseCode.trim();
   const cleanUsername = username.trim();
   const email = `${cleanUsername.toLowerCase().replace(/[^a-z0-9]/g, '')}@promptnest.local`;
+  // Clear any stale session data before login attempt
+  clearAllBrowserStorage();
 
   try {
     const { data: licenseData, error: licenseError } = await supabase
