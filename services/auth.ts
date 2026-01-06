@@ -192,6 +192,24 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
     }
 
     if (authUser) {
+      // For new users, skip profile query (trigger may not have created it yet)
+      // Create user object directly from signUp data
+      if (isNewUser) {
+        const newUser: User = {
+          id: authUser.id,
+          email: authUser.email || '',
+          displayName: cleanUsername,
+          photoUrl: `https://ui-avatars.com/api/?name=${cleanUsername.charAt(0)}&background=111&color=fff`,
+          licenseCode: cleanLicense,
+          username: cleanUsername,
+          joinedAt: Date.now(),
+          redeemedAt: Date.now(),
+        };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
+        return { success: true, user: newUser, isNewUser };
+      }
+
+      // For existing users, fetch profile normally
       const user = await mapSupabaseUser(authUser);
       if (user) {
         localStorage.setItem(SESSION_KEY, JSON.stringify(user));
