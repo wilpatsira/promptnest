@@ -331,7 +331,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <div className="flex gap-6 text-sm text-gray-500">
             <button onClick={() => setShowBuyModal(true)} className="hover:text-gray-900 cursor-pointer">Get License</button>
             <a href="#" className="hover:text-gray-900">Privacy</a>
-            <a href="#" className="hover:text-gray-900">Support</a>
+            <a href="mailto:merubahhidupmu@gmail.com" className="hover:text-gray-900">Support</a>
           </div>
         </div>
       </footer>
