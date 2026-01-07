@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 
 // ============================================
@@ -30,11 +30,19 @@ async function assignLicenseToBuyer(buyerEmail: string): Promise<string | null> 
 }
 
 // ============================================
-// EMAIL SERVICE (RESEND)
+// EMAIL SERVICE (GMAIL SMTP via Nodemailer)
 // ============================================
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.EMAIL_FROM || 'PromptNest <onboarding@resend.dev>';
+const GMAIL_USER = process.env.GMAIL_USER || '';
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || '';
 const APP_URL = process.env.APP_URL || 'https://promptnest-app.vercel.app';
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: GMAIL_USER,
+        pass: GMAIL_APP_PASSWORD,
+    },
+});
 
 async function sendLicenseEmail(to: string, customerName: string, licenseCode: string) {
     const displayName = customerName || to.split('@')[0];
@@ -78,24 +86,24 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
               
               <!-- License Code Box -->
               <div style="background: linear-gradient(135deg, #111 0%, #333 100%); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
-                <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px;">
+                <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 600; letter-spacing: 2px; color: #888; text-transform: uppercase;">
                   Your License Code
                 </p>
-                <p style="margin: 0; font-size: 28px; font-weight: 700; color: #fff; letter-spacing: 2px; font-family: monospace;">
+                <p style="margin: 0; font-size: 28px; font-weight: 700; font-family: 'SF Mono', Monaco, 'Courier New', monospace; color: #fff; letter-spacing: 2px;">
                   ${licenseCode}
                 </p>
               </div>
               
               <!-- CTA Button -->
-              <div style="text-align: center; margin-bottom: 24px;">
+              <div style="text-align: center; margin-bottom: 32px;">
                 <a href="${APP_URL}" 
-                   style="display: inline-block; background: #111; color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px;">
-                  Access PromptNest →
+                   style="display: inline-block; padding: 16px 32px; background: #111; color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; border-radius: 12px;">
+                  Open PromptNest →
                 </a>
               </div>
               
               <!-- Instructions -->
-              <div style="background: #f8f8f8; border-radius: 12px; padding: 20px; margin-top: 24px;">
+              <div style="background: #f8f8f8; border-radius: 12px; padding: 20px;">
                 <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #111;">
                   How to get started:
                 </h3>
@@ -129,28 +137,22 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
 </html>
   `.trim();
 
-    console.log('=== SENDING EMAIL ===');
+    console.log('=== SENDING EMAIL (Gmail SMTP) ===');
     console.log('  To:', to);
-    console.log('  From:', FROM_EMAIL);
-    console.log('  API Key present:', !!process.env.RESEND_API_KEY);
+    console.log('  From:', GMAIL_USER);
+    console.log('  Gmail credentials present:', !!GMAIL_USER && !!GMAIL_APP_PASSWORD);
     console.log('  License Code:', licenseCode);
 
-    const { data, error } = await resend.emails.send({
-        from: FROM_EMAIL,
-        to: [to],
+    const info = await transporter.sendMail({
+        from: `PromptNest <${GMAIL_USER}>`,
+        to: to,
         subject: '🔑 Your PromptNest License Code',
         html: htmlContent,
     });
 
-    if (error) {
-        console.error('=== RESEND ERROR ===');
-        console.error('  Error object:', JSON.stringify(error, null, 2));
-        throw new Error(`Failed to send email: ${error.message}`);
-    }
-
     console.log('=== EMAIL SENT SUCCESSFULLY ===');
-    console.log('  Response:', JSON.stringify(data, null, 2));
-    return data;
+    console.log('  Message ID:', info.messageId);
+    return info;
 }
 
 // ============================================
@@ -254,7 +256,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         if (merchantKey && signature) {
             const messageData = payload.data.message_data;
-            // Use grandTotal exactly (even if 0), as per Lynk.id docs
             const amount = messageData.totals?.grandTotal ?? 0;
 
             const isValid = validateLynkSignature(
@@ -267,8 +268,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             if (!isValid) {
                 console.warn('Signature validation failed - proceeding anyway for now');
-                // TODO: Uncomment to enforce signature validation
-                // return res.status(401).json({ error: 'Invalid signature' });
             } else {
                 console.log('Signature validated successfully');
             }
