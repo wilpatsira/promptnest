@@ -226,21 +226,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
               </div>
             )}
 
-            <div className="pt-6 flex flex-col items-center gap-4">
-              <button onClick={pingServer} className="flex items-center gap-2 text-[10px] text-gray-300 font-bold uppercase tracking-[0.2em] hover:text-gray-600 transition-colors">
-                <RefreshCcw size={10} /> Re-sync Secure Channel
-              </button>
-
-              <div className="flex flex-col items-center gap-3 pt-4 border-t border-gray-100 w-full">
-                <p className="text-[10px] text-gray-400 font-medium">Don't have a license?</p>
-                <div className="flex items-center gap-2">
-                  <a href={PURCHASE_LINKS.lynkid} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
-                    🇮🇩 Get License
-                  </a>
-                  <a href={PURCHASE_LINKS.gumroad} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
-                    🌍 Get License
-                  </a>
-                </div>
+            <div className="pt-6 flex flex-col items-center gap-3 border-t border-gray-100">
+              <p className="text-[10px] text-gray-400 font-medium pt-2">Don't have a license?</p>
+              <div className="flex items-center gap-2">
+                <a href={PURCHASE_LINKS.lynkid} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
+                  🇮🇩 Get License
+                </a>
+                <a href={PURCHASE_LINKS.gumroad} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
+                  🌍 Get License
+                </a>
               </div>
             </div>
           </div>
