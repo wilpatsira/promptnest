@@ -131,8 +131,6 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
   const cleanLicense = licenseCode.trim();
   const cleanUsername = username.trim();
   const email = `${cleanUsername.toLowerCase().replace(/[^a-z0-9]/g, '')}@promptnest.local`;
-  // Clear any stale session data before login attempt
-  clearAllBrowserStorage();
 
   try {
     const { data: licenseData, error: licenseError } = await supabase
@@ -171,16 +169,18 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
       authUser = signUpData.user;
       isNewUser = true;
 
-      // Update licenses table (critical - must await)
+      // Background updates (non-blocking) - user can proceed immediately
       if (authUser?.id) {
-        await supabase
-          .from('licenses')
-          .update({ is_used: true, used_by: authUser.id, activated_at: new Date().toISOString() })
-          .eq('code', cleanLicense);
-
-        // Update profiles in background (non-blocking) - trigger may not have created profile yet
+        const userId = authUser.id;
         setTimeout(async () => {
           try {
+            // Update licenses table
+            await supabase
+              .from('licenses')
+              .update({ is_used: true, used_by: userId, activated_at: new Date().toISOString() })
+              .eq('code', cleanLicense);
+
+            // Update profiles table (delay to let trigger create profile first)
             await supabase
               .from('profiles')
               .update({
@@ -188,11 +188,11 @@ export const signInWithLicense = async (username: string, licenseCode: string): 
                 username: cleanUsername,
                 redeemed_at: new Date().toISOString()
               })
-              .eq('id', authUser!.id);
+              .eq('id', userId);
           } catch (e) {
-            console.warn('Profile update deferred:', e);
+            console.warn('Background DB update:', e);
           }
-        }, 1000);
+        }, 500);
       }
     }
 
