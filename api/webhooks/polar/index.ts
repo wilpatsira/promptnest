@@ -157,34 +157,51 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
 // ============================================
 // POLAR.SH WEBHOOK SIGNATURE VALIDATION
 // Uses Standard Webhooks spec
+// Format: signed_payload = webhook-id.webhook-timestamp.body
 // ============================================
 function validatePolarSignature(
   payload: string,
-  signature: string | undefined,
+  headers: { id?: string; timestamp?: string; signature?: string },
   secret: string
 ): boolean {
-  if (!signature || !secret) {
+  if (!headers.signature || !secret) {
     console.log('Skipping signature validation (no signature or secret)');
     return true; // Skip validation if no secret configured
   }
 
   try {
-    // Polar uses Standard Webhooks format
-    // Signature header format: v1,<base64-signature>
-    const parts = signature.split(',');
-    if (parts.length < 2) {
+    // Standard Webhooks signature format: v1,<base64-signature>
+    const sigParts = headers.signature.split(',');
+    if (sigParts.length < 2) {
       console.warn('Invalid signature format');
       return false;
     }
 
-    const signatureValue = parts[1];
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
+    const receivedSig = sigParts[1].trim();
+
+    // Standard Webhooks signed payload = {id}.{timestamp}.{body}
+    const signedPayload = `${headers.id}.${headers.timestamp}.${payload}`;
+
+    // Secret format: whsec_xxx or polar_whs_xxx - need to decode base64 secret
+    // Polar secrets start with polar_whs_ and might need special handling
+    let secretKey = secret;
+
+    // If secret has prefix, use as-is for HMAC
+    // Standard Webhooks uses the raw secret, not base64 decoded
+    const expectedSig = crypto
+      .createHmac('sha256', secretKey)
+      .update(signedPayload)
       .digest('base64');
 
-    const isValid = signatureValue === expectedSignature;
-    console.log('Signature validation:', isValid ? 'PASSED' : 'FAILED');
+    console.log('Signature validation:');
+    console.log('  Webhook ID:', headers.id);
+    console.log('  Webhook Timestamp:', headers.timestamp);
+    console.log('  Received sig:', receivedSig);
+    console.log('  Expected sig:', expectedSig);
+
+    const isValid = receivedSig === expectedSig;
+    console.log('  Result:', isValid ? 'PASSED' : 'FAILED');
+
     return isValid;
   } catch (error) {
     console.error('Signature validation error:', error);
@@ -253,10 +270,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Validate signature (optional - depends on if secret is configured)
     const polarSecret = process.env.POLAR_WEBHOOK_SECRET;
-    const signature = req.headers['webhook-signature'] as string | undefined;
+    const webhookHeaders = {
+      id: req.headers['webhook-id'] as string | undefined,
+      timestamp: req.headers['webhook-timestamp'] as string | undefined,
+      signature: req.headers['webhook-signature'] as string | undefined,
+    };
 
     if (polarSecret) {
-      const isValid = validatePolarSignature(rawBody, signature, polarSecret);
+      const isValid = validatePolarSignature(rawBody, webhookHeaders, polarSecret);
       if (!isValid) {
         console.warn('Signature validation failed - proceeding anyway for now');
         // TODO: Uncomment to enforce
