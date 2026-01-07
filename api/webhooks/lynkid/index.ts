@@ -85,11 +85,11 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
               </p>
               
               <!-- License Code Box -->
-              <div style="background: linear-gradient(135deg, #111 0%, #333 100%); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
-                <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 600; letter-spacing: 2px; color: #888; text-transform: uppercase;">
+              <div style="background: #f0f0f0; border: 2px solid #111; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 600; letter-spacing: 2px; color: #666; text-transform: uppercase;">
                   Your License Code
                 </p>
-                <p style="margin: 0; font-size: 28px; font-weight: 700; font-family: 'SF Mono', Monaco, 'Courier New', monospace; color: #fff; letter-spacing: 2px;">
+                <p style="margin: 0; font-size: 28px; font-weight: 700; font-family: 'SF Mono', Monaco, 'Courier New', monospace; color: #111; letter-spacing: 2px;">
                   ${licenseCode}
                 </p>
               </div>
