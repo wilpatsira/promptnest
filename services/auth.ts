@@ -61,30 +61,50 @@ export const checkConnection = async (): Promise<{ connected: boolean; status: '
 };
 
 export const mapSupabaseUser = async (supabaseUser: SupabaseUser): Promise<User | null> => {
+  // Fallback user from auth metadata (no DB query needed)
+  const fallbackUser: User = {
+    id: supabaseUser.id,
+    email: supabaseUser.email || '',
+    displayName: supabaseUser.user_metadata?.display_name || supabaseUser.email?.split('@')[0] || 'User',
+    photoUrl: `https://ui-avatars.com/api/?name=${(supabaseUser.user_metadata?.display_name || 'U').charAt(0)}&background=111&color=fff`,
+    licenseCode: 'ACTIVE-USER',
+    username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0] || 'User',
+    joinedAt: Date.now(),
+    redeemedAt: undefined,
+  };
+
   try {
-    const { data: profile } = await supabase
+    // Race between profile query and 3s timeout
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+
+    const profilePromise = supabase
       .from('profiles')
       .select('*')
       .eq('id', supabaseUser.id)
       .maybeSingle();
 
-    const displayName = profile?.display_name || supabaseUser.user_metadata?.display_name || supabaseUser.email?.split('@')[0] || 'User';
-    const photoUrl = profile?.photo_url || `https://ui-avatars.com/api/?name=${displayName.charAt(0)}&background=111&color=fff`;
-    const joinedAt = profile?.created_at ? new Date(profile.created_at).getTime() : Date.now();
-    const redeemedAt = profile?.redeemed_at ? new Date(profile.redeemed_at).getTime() : undefined;
+    const result = await Promise.race([profilePromise, timeoutPromise]);
+
+    // If timeout or error, return fallback
+    if (!result || 'error' in result && result.error) {
+      return fallbackUser;
+    }
+
+    const profile = result.data;
+    if (!profile) return fallbackUser;
 
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
-      displayName: displayName,
-      photoUrl: photoUrl,
-      licenseCode: profile?.license_code || 'ACTIVE-USER',
-      username: profile?.username || displayName,
-      joinedAt: joinedAt,
-      redeemedAt: redeemedAt,
+      displayName: profile.display_name || fallbackUser.displayName,
+      photoUrl: profile.photo_url || fallbackUser.photoUrl,
+      licenseCode: profile.license_code || 'ACTIVE-USER',
+      username: profile.username || fallbackUser.username,
+      joinedAt: profile.created_at ? new Date(profile.created_at).getTime() : Date.now(),
+      redeemedAt: profile.redeemed_at ? new Date(profile.redeemed_at).getTime() : undefined,
     };
   } catch (e) {
-    return null;
+    return fallbackUser;
   }
 };
 
