@@ -129,6 +129,12 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
 </html>
   `.trim();
 
+    console.log('=== SENDING EMAIL ===');
+    console.log('  To:', to);
+    console.log('  From:', FROM_EMAIL);
+    console.log('  API Key present:', !!process.env.RESEND_API_KEY);
+    console.log('  License Code:', licenseCode);
+
     const { data, error } = await resend.emails.send({
         from: FROM_EMAIL,
         to: [to],
@@ -137,10 +143,13 @@ async function sendLicenseEmail(to: string, customerName: string, licenseCode: s
     });
 
     if (error) {
-        console.error('Resend error:', error);
+        console.error('=== RESEND ERROR ===');
+        console.error('  Error object:', JSON.stringify(error, null, 2));
         throw new Error(`Failed to send email: ${error.message}`);
     }
 
+    console.log('=== EMAIL SENT SUCCESSFULLY ===');
+    console.log('  Response:', JSON.stringify(data, null, 2));
     return data;
 }
 
