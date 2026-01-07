@@ -1,8 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { KeyRound, ArrowRight, Loader2, AlertCircle, ArrowLeft, AtSign, Eye, EyeOff, ShieldCheck, Wifi, WifiOff, Lock, Sparkles, RefreshCcw } from 'lucide-react';
+import { KeyRound, ArrowRight, Loader2, AlertCircle, ArrowLeft, AtSign, Eye, EyeOff, ShieldCheck, Wifi, WifiOff, Lock, Sparkles, RefreshCcw, ShoppingBag } from 'lucide-react';
 import { signInWithLicense, checkConnection } from '../services/auth';
 import { User as UserType } from '../types';
+
+const PURCHASE_LINKS = {
+  lynkid: 'https://lynk.id/yangpentingtekad/77j3dzw39x2v',
+  gumroad: 'https://merubahhidupmu.gumroad.com/l/promptnest'
+};
 
 interface AuthModalProps {
   onLogin: (user: UserType, isNewUser?: boolean) => void;
@@ -221,10 +226,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
               </div>
             )}
 
-            <div className="pt-6 flex flex-col items-center">
+            <div className="pt-6 flex flex-col items-center gap-4">
               <button onClick={pingServer} className="flex items-center gap-2 text-[10px] text-gray-300 font-bold uppercase tracking-[0.2em] hover:text-gray-600 transition-colors">
                 <RefreshCcw size={10} /> Re-sync Secure Channel
               </button>
+
+              <div className="flex flex-col items-center gap-2 pt-2 border-t border-gray-100 w-full">
+                <p className="text-[10px] text-gray-400 font-medium">Don't have a license?</p>
+                <div className="flex items-center gap-3">
+                  <a href={PURCHASE_LINKS.lynkid} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-bold rounded-lg hover:opacity-90 transition-all shadow-sm">
+                    <ShoppingBag size={10} /> Indonesia
+                  </a>
+                  <a href={PURCHASE_LINKS.gumroad} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[10px] font-bold rounded-lg hover:opacity-90 transition-all shadow-sm">
+                    <ShoppingBag size={10} /> Global
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
