@@ -6,7 +6,7 @@ import { User as UserType } from '../types';
 
 const PURCHASE_LINKS = {
   lynkid: 'https://lynk.id/yangpentingtekad/77j3dzw39x2v',
-  gumroad: 'https://merubahhidupmu.gumroad.com/l/promptnest'
+  polar: 'https://buy.polar.sh/polar_cl_6x1OqBqbv5ABJQrXA8c3o4cg2aAogslkHDhuC1ACdes'
 };
 
 interface AuthModalProps {
@@ -232,7 +232,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onLogin, onBack }) => {
                 <a href={PURCHASE_LINKS.lynkid} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
                   🇮🇩 Get License
                 </a>
-                <a href={PURCHASE_LINKS.gumroad} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
+                <a href={PURCHASE_LINKS.polar} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-wider rounded-xl hover:bg-gray-100 hover:border-gray-300 transition-all">
                   🌍 Get License
                 </a>
               </div>

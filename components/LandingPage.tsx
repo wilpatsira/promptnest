@@ -4,7 +4,7 @@ import { ArrowRight, Check, Zap, Layout, Shield, Smartphone, Play, Command, File
 // Purchase Links - Update these with your actual store URLs
 const PURCHASE_LINKS = {
   lynkId: 'https://lynk.id/yangpentingtekad/77j3dzw39x2v', // Indonesia
-  gumroad: 'https://merubahhidupmu.gumroad.com/l/promptnest', // Global
+  polar: 'https://buy.polar.sh/polar_cl_6x1OqBqbv5ABJQrXA8c3o4cg2aAogslkHDhuC1ACdes', // Global
 };
 
 interface LandingPageProps {
@@ -374,21 +374,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <ArrowRight className="text-gray-400 group-hover:text-red-500 group-hover:translate-x-1 transition-all" size={20} />
               </a>
 
-              {/* Gumroad - Global */}
+              {/* Polar - Global */}
               <a
-                href={PURCHASE_LINKS.gumroad}
+                href={PURCHASE_LINKS.polar}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-pink-50 to-white border-2 border-pink-100 rounded-2xl hover:border-pink-300 hover:shadow-lg transition-all group"
+                className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-white border-2 border-blue-100 rounded-2xl hover:border-blue-300 hover:shadow-lg transition-all group"
               >
-                <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center group-hover:bg-pink-200 transition-colors">
-                  <Globe className="text-pink-600" size={24} />
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Globe className="text-blue-600" size={24} />
                 </div>
                 <div className="flex-1 text-left">
-                  <h4 className="font-bold text-gray-900">Gumroad</h4>
+                  <h4 className="font-bold text-gray-900">Polar</h4>
                   <p className="text-xs text-gray-500">Global • USD / International</p>
                 </div>
-                <ArrowRight className="text-gray-400 group-hover:text-pink-500 group-hover:translate-x-1 transition-all" size={20} />
+                <ArrowRight className="text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" size={20} />
               </a>
             </div>
 
