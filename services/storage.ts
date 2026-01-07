@@ -184,23 +184,21 @@ export const seedInitialData = async (userId: string): Promise<Prompt[]> => {
       {
         id: crypto.randomUUID(),
         userId,
-        title: 'Expert Code Reviewer',
-        description: 'Get thorough, actionable code reviews with best practices.',
-        content: `You are a senior software engineer with 15+ years of experience. Review this {{language}} code for:
+        title: 'Viral Content Hook Generator',
+        description: 'Create scroll-stopping hooks for social media content.',
+        content: `You are a viral content strategist. Generate 10 powerful hooks for my {{platform}} content about "{{topic}}".
 
-1. **Bugs & Logic Errors** - Identify potential issues
-2. **Performance** - Suggest optimizations  
-3. **Security** - Flag vulnerabilities
-4. **Readability** - Improve code clarity
-5. **Best Practices** - Apply industry standards
+**Content Goal:** {{goal}} (educate/entertain/inspire/sell)
+**Target Audience:** {{audience}}
+**Tone:** {{tone}} (professional/casual/bold/inspiring)
 
-Code to review:
-\`\`\`{{language}}
-{{code}}
-\`\`\`
+For each hook, provide:
+1. The hook text (under 15 words)
+2. Why it works psychologically  
+3. Best visual pairing suggestion
 
-Provide specific line-by-line feedback with improved code snippets.`,
-        tags: ['Development', 'Code Review'],
+Make them curiosity-driven, benefit-focused, or pattern-interrupting.`,
+        tags: ['Content Creation', 'Social Media'],
         platform: 'ChatGPT',
         createdAt: now,
         updatedAt: now,
@@ -210,20 +208,26 @@ Provide specific line-by-line feedback with improved code snippets.`,
       {
         id: crypto.randomUUID(),
         userId,
-        title: 'Strategic Content Writer',
-        description: 'Create engaging, SEO-optimized content for any topic.',
-        content: `Write a comprehensive {{content_type}} about "{{topic}}" for {{target_audience}}.
+        title: 'Academic Literature Review',
+        description: 'Comprehensive literature review for research papers.',
+        content: `Conduct a systematic literature review on "{{research_topic}}".
 
-Requirements:
-- Tone: {{tone}} (professional/casual/persuasive)
-- Length: {{word_count}} words
-- Include: compelling hook, clear structure, actionable insights
-- Optimize for SEO with natural keyword integration
-- End with a strong call-to-action
+**Research Parameters:**
+- Field: {{academic_field}}
+- Time range: {{year_range}}
+- Focus: {{specific_focus}}
 
-Additional context: {{context}}`,
-        tags: ['Marketing', 'Writing', 'SEO'],
-        platform: 'Claude',
+**Deliverables:**
+1. **Overview** - Current state of research (300 words)
+2. **Key Themes** - Major theoretical frameworks and debates
+3. **Methodology Analysis** - Common approaches used
+4. **Research Gaps** - Unexplored areas and opportunities
+5. **Critical Synthesis** - Connections between studies
+6. **Future Directions** - Recommended research questions
+
+Include proper academic citations in {{citation_style}} format.`,
+        tags: ['Research', 'Academic', 'Literature Review'],
+        platform: 'Perplexity',
         createdAt: now - 1000,
         updatedAt: now - 1000,
         history: [],
@@ -232,23 +236,28 @@ Additional context: {{context}}`,
       {
         id: crypto.randomUUID(),
         userId,
-        title: 'Data Analysis Assistant',
-        description: 'Transform raw data into actionable insights.',
-        content: `Analyze this {{data_type}} dataset and provide:
+        title: 'Article & Essay Writer',
+        description: 'Create well-structured, engaging long-form content.',
+        content: `Write a {{word_count}}-word {{content_type}} about "{{topic}}".
 
-1. **Summary Statistics** - Key metrics and distributions
-2. **Trend Analysis** - Patterns and anomalies  
-3. **Correlations** - Relationships between variables
-4. **Actionable Insights** - Business recommendations
-5. **Visualization Suggestions** - Best charts to use
+**Writing Brief:**
+- Purpose: {{purpose}} (inform/persuade/analyze/narrate)
+- Audience: {{target_reader}}
+- Tone: {{writing_tone}}
+- Key message: {{main_argument}}
 
-Dataset description: {{dataset_description}}
-Key questions to answer: {{questions}}
-Industry context: {{industry}}
+**Structure Requirements:**
+1. Compelling opening hook
+2. Clear thesis statement  
+3. Well-organized body with transitions
+4. Evidence and examples
+5. Strong conclusion with takeaway
 
-Present findings in a clear, executive-friendly format.`,
-        tags: ['Analytics', 'Business'],
-        platform: 'Gemini',
+**Style Notes:** {{style_notes}}
+
+Write in a distinctive voice that engages readers from start to finish.`,
+        tags: ['Writing', 'Articles', 'Essays'],
+        platform: 'Claude',
         createdAt: now - 2000,
         updatedAt: now - 2000,
         history: [],
@@ -257,25 +266,27 @@ Present findings in a clear, executive-friendly format.`,
       {
         id: crypto.randomUUID(),
         userId,
-        title: 'Research Deep Dive',
-        description: 'Comprehensive research with citations and sources.',
-        content: `Conduct thorough research on "{{research_topic}}" and provide:
+        title: 'Lecture Material Builder',
+        description: 'Create engaging educational content and presentations.',
+        content: `Design a complete {{duration}}-minute lecture on "{{lecture_topic}}".
 
-**Research Scope:**
-- Focus area: {{focus_area}}
-- Time period: {{time_period}}
-- Geographic scope: {{region}}
+**Course Context:**
+- Subject: {{subject}}
+- Level: {{student_level}} (undergraduate/graduate/professional)
+- Learning objectives: {{objectives}}
 
-**Deliverables:**
-1. Executive summary (3-5 key findings)
-2. Detailed analysis with supporting evidence
-3. Contrarian viewpoints and limitations
-4. Future outlook and predictions
-5. List of authoritative sources with links
+**Generate:**
+1. **Lecture Outline** - Main sections with timing
+2. **Opening Hook** - Engaging introduction (2-3 minutes)
+3. **Core Content** - Key concepts with explanations
+4. **Discussion Questions** - 5 thought-provoking questions
+5. **Practical Examples** - Real-world applications
+6. **Assessment Ideas** - Quiz questions or assignments
+7. **Slide Suggestions** - Visual content recommendations
 
-Prioritize recent, peer-reviewed, and credible sources.`,
-        tags: ['Research', 'Academic'],
-        platform: 'Perplexity',
+Make it interactive and student-centered.`,
+        tags: ['Education', 'Teaching', 'Lectures'],
+        platform: 'Gemini',
         createdAt: now - 3000,
         updatedAt: now - 3000,
         history: [],
@@ -284,26 +295,27 @@ Prioritize recent, peer-reviewed, and credible sources.`,
       {
         id: crypto.randomUUID(),
         userId,
-        title: 'API Integration Builder',
-        description: 'Generate production-ready API integration code.',
-        content: `Create a complete {{language}} integration for the {{api_name}} API.
+        title: 'Creative Brief Generator',
+        description: 'Develop comprehensive briefs for creative projects.',
+        content: `Create a professional creative brief for a {{project_type}} project.
 
-**Requirements:**
-- Authentication: {{auth_type}} (OAuth2/API Key/Bearer)
-- Endpoints needed: {{endpoints}}
-- Error handling: Comprehensive with retries
-- Rate limiting: Respect API limits
-- Logging: Debug and production modes
+**Project Overview:**
+- Client/Brand: {{brand_name}}
+- Industry: {{industry}}
+- Campaign: {{campaign_name}}
 
-**Include:**
-1. Configuration/environment setup
-2. API client class with all methods
-3. Request/response type definitions
-4. Usage examples
-5. Unit test templates
+**Brief Components:**
+1. **Background** - Brand context and challenge
+2. **Objectives** - Specific, measurable goals
+3. **Target Audience** - Demographics, psychographics, pain points
+4. **Key Message** - Single most important takeaway
+5. **Tone & Style** - Creative direction guidelines
+6. **Deliverables** - Required assets and formats
+7. **Timeline** - Key milestones and deadlines
+8. **Success Metrics** - How to measure results
 
-Follow {{language}} best practices and coding standards.`,
-        tags: ['Development', 'API', 'Integration'],
+Additional requirements: {{additional_notes}}`,
+        tags: ['Creative', 'Marketing', 'Branding'],
         platform: 'Copilot',
         createdAt: now - 4000,
         updatedAt: now - 4000,
@@ -313,24 +325,30 @@ Follow {{language}} best practices and coding standards.`,
       {
         id: crypto.randomUUID(),
         userId,
-        title: 'Meeting Notes Synthesizer',
-        description: 'Transform messy meeting notes into structured summaries.',
-        content: `Transform these meeting notes into a professional summary:
+        title: 'Legal Document Analyzer',
+        description: 'Review and analyze legal documents for key insights.',
+        content: `Analyze this {{document_type}} and provide a comprehensive review.
 
-**Raw Notes:**
-{{meeting_notes}}
+**Document Context:**
+- Type: {{document_type}} (contract/agreement/policy/regulation)
+- Jurisdiction: {{jurisdiction}}
+- Purpose: {{review_purpose}}
 
-**Generate:**
-1. **Meeting Overview** - Date, attendees, purpose (2-3 sentences)
-2. **Key Decisions** - Bullet points of what was decided
-3. **Action Items** - Task, owner, deadline (table format)
-4. **Discussion Highlights** - Important points raised
-5. **Next Steps** - Follow-up meetings, pending items
-6. **Parking Lot** - Topics deferred for later
+**Analysis Required:**
+1. **Executive Summary** - Key points in plain language
+2. **Rights & Obligations** - Party responsibilities
+3. **Risk Assessment** - Potential liabilities and concerns
+4. **Key Clauses** - Important terms highlighted
+5. **Missing Elements** - Standard provisions not included
+6. **Recommendations** - Suggested modifications
+7. **Questions to Clarify** - Ambiguous language identified
 
-Format for easy sharing via {{format}} (email/Slack/Notion).`,
-        tags: ['Productivity', 'Business'],
-        platform: 'Grok',
+**Document text:**
+{{document_text}}
+
+Note: This is for informational purposes, not legal advice.`,
+        tags: ['Legal', 'Contracts', 'Analysis'],
+        platform: 'Claude',
         createdAt: now - 5000,
         updatedAt: now - 5000,
         history: [],
